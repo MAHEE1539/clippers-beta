@@ -1,38 +1,205 @@
-.App {
+/* App.css - Bunkers Bell styling */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f6f3ee;
+  color: #222;
+}
+
+.header {
+  background-color: #6b4226;
+  color: #fff;
+  padding: 18px 0;
   text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  position: relative;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.container {
+  max-width: 1000px;
+  margin: 28px auto;
+  padding: 18px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.card {
+  background: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  margin-bottom: 12px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Menu */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.menu-item {
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #eee;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.menu-item h4 { margin: 0 0 8px 0; }
+.menu-item p { margin: 0 0 10px 0; color: #666; }
+
+.menu-list-item {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.menu-list-item:last-child {
+  border-bottom: none;
+}
+
+.btn {
+  background: #6b4226;
   color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.App-link {
-  color: #61dafb;
+.btn:hover {
+  opacity: 0.9;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.btn.secondary {
+  background: #e9e2d8;
+  color: #333;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.cart {
+  margin-top: 12px;
+}
+
+/* cashier sections */
+.section {
+  margin-bottom: 18px;
+}
+.order-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #f0eee9;
+  margin-bottom: 8px;
+  background: #fff;
+}
+.order-left { max-width: 70%; }
+.small { font-size: 13px; color: #666; }
+.status-badge {
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* status colors */
+.status-Pending { background: #fff3cd; color: #7a6000; }
+.status-Preparing { background: #d1ecf1; color: #0c5460; }
+.status-Ready { background: #d4edda; color: #155724; }
+.status-Done { background:#e2e3e5; color: #383d41; }
+
+/* logo + title */
+.logo {
+  position: absolute;
+  left: 20px;
+  height: 40px;
+  width: auto;
+}
+
+.title {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #4b3f2f;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 768px) {
+  .header {
+    font-size: 22px;
+    padding: 14px 0;
   }
-  to {
-    transform: rotate(360deg);
+
+  .logo {
+    position: relative;
+    display: block;
+    margin: 0 auto 10px auto;
+  }
+
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-list-item {
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 15px;
+  }
+
+  .btn {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  .order-card {
+    flex-direction: column;
+    gap: 8px;
   }
 }
+
+/* Very small phones */
+@media (max-width: 480px) {
+  .header {
+    font-size: 20px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  .menu-list-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+

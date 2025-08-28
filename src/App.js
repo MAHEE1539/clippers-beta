@@ -1,24 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import "./App.css";
+import logo from "./assets/pic.png";
+import CashierPage from "./pages/CashierPage";
+import MenuPage from "./pages/MenuPage";
 
-function App() {
+function App(){
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <Router>
+      <header className="header">
+        <img src={logo} alt="Bunkers Bell Logo" className="logo" />
+        Bunkers Bell
       </header>
-    </div>
+      <div className="container">
+        {/* Top links for testing only - remove or hide in production */}
+        {/* <nav style={{ marginBottom: 16 }}>
+          <Link to="/menu" style={{ marginRight: 12 }}>Menu</Link>
+          <Link to="/cashier">Cashier</Link>
+        </nav> */}
+
+        <Routes>
+          <Route path="/" element={<Navigate to="/menu" replace />} />
+          <Route path="/menu" element={<MenuPage />} />
+          <Route path="/cashier" element={<CashierPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
