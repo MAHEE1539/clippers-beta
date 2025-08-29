@@ -1,48 +1,75 @@
 // src/pages/CashierPage.js
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc } from "firebase/firestore";
+import {
+  onAuthStateChanged, signInWithEmailAndPassword, signOut
+} from "firebase/auth";
+import {
+  collection,
+  doc, onSnapshot, orderBy, query, updateDoc
+} from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth, db } from "../firebase";
 
 export default function CashierPage(){
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Orders
   const [orders, setOrders] = useState([]);
   const [showDone, setShowDone] = useState(false);
 
+  // Menu
+  const [menu, setMenu] = useState([]);
+  const [newItem, setNewItem] = useState({ name: "", price: "", category: "", inStock: true });
+
+  // Auth
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsubAuth();
   }, []);
 
+  // Orders snapshot
   useEffect(() => {
     if(!user) { setOrders([]); return; }
     const q = query(collection(db, "orders"), orderBy("createdAt", "asc"));
     const unsub = onSnapshot(q, (snap) => {
       setOrders(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => {
-      console.error("Orders snapshot error:", err);
-      alert("Failed to load orders. Check console & security rules.");
     });
     return () => unsub();
   }, [user]);
 
+  // Menu snapshot
+  useEffect(() => {
+    if(!user) { setMenu([]); return; }
+    const unsub = onSnapshot(collection(db, "menuItems"), (snap) => {
+      setMenu(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, [user]);
+
+  // Order helpers
   const pending = useMemo(()=> orders.filter(o=> o.status === "Pending"), [orders]);
   const preparing = useMemo(()=> orders.filter(o=> o.status === "Preparing"), [orders]);
   const ready = useMemo(()=> orders.filter(o=> o.status === "Ready"), [orders]);
   const done = useMemo(()=> orders.filter(o=> o.status === "Done"), [orders]);
 
+  const navigate = useNavigate();
+
   const setStatus = async (id, status) => {
-    try {
-      await updateDoc(doc(db, "orders", id), { status });
-    } catch (err) {
-      console.error("Failed to update status:", err);
-      alert("Failed to update status. Check console and rules.");
-    }
+    await updateDoc(doc(db, "orders", id), { status });
   };
 
-  // Group Done orders by date
+  const todayDone = useMemo(() => {
+    const todayStr = new Date().toLocaleDateString();
+    return done.filter(o => {
+      if (!o.createdAt?.seconds) return false;
+      const orderDate = new Date(o.createdAt.seconds * 1000).toLocaleDateString();
+      return orderDate === todayStr;
+    });
+  }, [done]);
+
+
   const groupedDone = useMemo(() => {
     const groups = {};
     done.forEach(o => {
@@ -53,32 +80,34 @@ export default function CashierPage(){
     return groups;
   }, [done]);
 
-  // Cleanup: delete old Done orders from Firestore, keep only today's
-  useEffect(() => {
-    if(done.length === 0) return;
-    const todayStr = new Date().toLocaleDateString();
-    done.forEach(async (o) => {
-      const orderDate = new Date(o.createdAt?.seconds * 1000).toLocaleDateString();
-      if(orderDate !== todayStr){
-        try {
-          await deleteDoc(doc(db, "orders", o.id));
-          console.log("Deleted old order", o.id);
-        } catch(err) {
-          console.error("Failed to delete old order:", err);
-        }
-      }
-    });
-  }, [done]);
+  // // Menu CRUD
+  // const addMenuItem = async (e) => {
+  //   e.preventDefault();
+  //   if(!newItem.name || !newItem.price) return alert("Name & Price required");
+  //   await addDoc(collection(db, "menuItems"), {
+  //     name: newItem.name,
+  //     price: parseFloat(newItem.price),
+  //     category: newItem.category || "General",
+  //     inStock: newItem.inStock,
+  //   });
+  //   setNewItem({ name: "", price: "", category: "", inStock: true });
+  // };
 
+  // const updateMenuItem = async (id, updates) => {
+  //   await updateDoc(doc(db, "menuItems", id), updates);
+  // };
+
+  // const deleteMenuItem = async (id) => {
+  //   if(window.confirm("Delete this item?")){
+  //     await deleteDoc(doc(db, "menuItems", id));
+  //   }
+  // };
+
+  // Login
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setEmail(""); setPassword("");
-    } catch (err) {
-      console.error("Login failed", err);
-      alert("Login failed: " + err.message);
-    }
+    await signInWithEmailAndPassword(auth, email, password);
+    setEmail(""); setPassword("");
   };
 
   if(!user){
@@ -96,13 +125,76 @@ export default function CashierPage(){
 
   return (
     <div>
+      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h2>Orders Dashboard</h2>
+        <h2>Cashier Dashboard</h2>
+        <button className="btn" onClick={() => navigate("/menu-management")}>
+          Menu Management
+        </button>
         <div>
           <span style={{ marginRight: 8 }}>Signed in: {user.email}</span>
           <button className="btn secondary" onClick={() => signOut(auth)}>Sign out</button>
         </div>
       </div>
+
+      {/* ---- MENU MANAGEMENT ----
+      <div className="section" style={{ marginBottom: 20 }}>
+        <h3>Menu Management</h3>
+        <form onSubmit={addMenuItem} style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+          <input 
+            placeholder="Name" 
+            value={newItem.name} 
+            onChange={(e)=>setNewItem({...newItem, name: e.target.value})} 
+          />
+          <input 
+            type="number" 
+            placeholder="Price" 
+            value={newItem.price} 
+            onChange={(e)=>setNewItem({...newItem, price: e.target.value})} 
+          />
+          <input 
+            placeholder="Category" 
+            value={newItem.category} 
+            onChange={(e)=>setNewItem({...newItem, category: e.target.value})} 
+          />
+          <button className="btn" type="submit">Add</button>
+        </form>
+
+        {menu.map(item => (
+          <div key={item.id} className="order-card" style={{ display: "flex", justifyContent: "space-between" }}>
+            <div>
+              <strong>{item.name}</strong> · ₹{item.price} · {item.category}
+              <div className="small">Status: {item.inStock ? "In Stock" : "Out of Stock"}</div>
+            </div>
+            <div>
+              <button className="btn secondary" onClick={() => 
+                updateMenuItem(item.id, { inStock: !item.inStock })
+              }>
+                {item.inStock ? "Mark Out of Stock" : "Mark In Stock"}
+              </button>
+              <button 
+                className="btn secondary" 
+                style={{ marginLeft: 8 }} 
+                onClick={() => {
+                  const newPrice = prompt("Enter new price:", item.price);
+                  if(newPrice) updateMenuItem(item.id, { price: parseFloat(newPrice) });
+                }}
+              >Edit Price</button>
+              <button 
+                className="btn danger" 
+                style={{ marginLeft: 8 }} 
+                onClick={() => deleteMenuItem(item.id)}
+              >Delete</button>
+            </div>
+          </div>
+        ))}
+      </div> */}
+
+      {/* ---- ORDERS MANAGEMENT ---- */}
+      {/* Pending, Preparing, Ready, Done sections (same as before)... */}
+      {/* Keep your existing order code unchanged below this */}
+
+
 
       {/* Pending Section */}
       <div className="section">
@@ -187,7 +279,7 @@ export default function CashierPage(){
               }}
           onClick={() => setShowDone(!showDone)}
         >
-          Done ({done.length}) {showDone ? "▲" : "▼"}
+          Done ({todayDone.length}) {showDone ? "▲" : "▼"}
         </h4>
         {showDone && Object.entries(groupedDone).map(([date, list]) => {
           const isToday = date === new Date().toLocaleDateString();

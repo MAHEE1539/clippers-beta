@@ -3,6 +3,7 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-d
 import "./App.css";
 import logo from "./assets/pic.png";
 import CashierPage from "./pages/CashierPage";
+import MenuManagementPage from "./pages/MenuManagementPage";
 import MenuPage from "./pages/MenuPage";
 
 function App(){
@@ -23,6 +24,7 @@ function App(){
           <Route path="/" element={<Navigate to="/menu" replace />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/cashier" element={<CashierPage />} />
+          <Route path="/menu-management" element={<MenuManagementPage />} />
         </Routes>
       </div>
     </Router>

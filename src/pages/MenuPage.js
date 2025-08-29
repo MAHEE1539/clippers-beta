@@ -1,97 +1,41 @@
 // src/pages/MenuPage.js
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { useMemo, useState } from "react";
+import { addDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
+import { useEffect, useMemo, useState } from "react";
 import { db } from "../firebase";
-
-// Menu structured into categories and sub-items
-const MENU_SECTIONS = [
-  {
-    name: "Tea",
-    items: [
-      { id: "bb-special-Tea", name: "BB Special Tea", price: 30 },
-      { id: "allam-tea", name: "Allam Tea", price: 35 },
-      { id: "green-tea", name: "Green Tea", price: 30 },
-      { id: "lemon-tea", name: "Lemon Tea", price: 25 },
-      { id: "black-tea", name: "Black Tea", price: 30 },
-      { id: "ice-tea", name: "Ice Tea", price: 40 },
-      { id: "badam-tea", name: "Badam Tea", price: 30 },
-      { id: "Normal-tea", name: "Normal Tea", price: 15 },
-    ]
-  },
-  {
-    name: "Coffee",
-    items: [
-      { id: "coffee", name: "Coffee", price: 25 },
-      { id: "cappuccino", name: "Cappuccino", price: 50 },
-      { id: "cold-coffee", name: "Cold Coffee", price: 70 },
-      { id: "black-coffee", name: "Black Coffee", price: 30 },
-    ]
-  },
-  {
-    name: "Snacks",
-    items: [
-      { id: "veg-puff", name: "Veg Puff", price: 25 },
-      { id: "egg-puff", name: "Egg Puff", price: 30 },
-      { id: "panner-puff", name: "Panner Puff", price: 50 },
-      { id: "chicken-tea", name: "Chicken Puff", price: 50 },
-      { id: "biscuits", name: "Biscuits", price: 5 },
-      { id: "cream-bun", name: "Cream Bun", price: 20 },
-      { id: "dil-pasand", name: "Dil Pasand", price: 20 },
-      { id: "hot-dog", name: "Hot Dog", price: 50 },
-      { id: "french-fries", name: "French Fries", price: 70 },
-      { id: "veg-nuggets", name: "Veg Nuggets", price: 70 },
-      { id: "non-veg-nuggets", name: "Non Veg Nuggets", price: 80 },
-      { id: "burger", name: "Burger", price: 70 },
-      { id: "sandwich", name: "Sandwich", price: 70 },
-      { id: "maggie", name: "Double Maggie", price: 60 },
-      { id: "pasta", name: "Pasta", price: 70 },
-    ]
-  },
-  {
-    name: "Mojito",
-    items: [
-      { id: "blue-berry", name: "Blue Berry", price: 60 },
-      { id: "raspberry", name: "Raspberry", price: 60 },
-      { id: "watermelon", name: "Watermelon", price: 60 },
-      { id: "pineapple", name: "Pineapple", price: 60 },
-      { id: "strawberry", name: "Strawberry", price: 60 },
-      { id: "mint", name: "Mint", price: 60 },
-    ]
-  },
-  {
-    name: "Juices",
-    items: [
-      { id: "grape", name: "Grape", price: 50 },
-      { id: "Banana", name: "Banana", price: 50 },
-      { id: "watermelon", name: "Watermelon", price: 50 },
-      { id: "pineapple", name: "Pineapple", price: 50 },
-      { id: "sapota", name: "Sapota", price: 50 },
-      { id: "karbuja", name: "Karbuja", price: 50 },
-      { id: "badam-milk", name: "Badam Milk", price: 70 },
-    ]
-  },
-  {
-    name: "Milkshakes",
-    items: [
-      { id: "Chocolate", name: "Chocolate", price: 80 },
-      { id: "Vanilla", name: "Vanilla", price: 80 },
-      { id: "oreo", name: "Oreo", price: 80 },
-      { id: "butterscotch", name: "Butterscotch", price: 80 },
-      { id: "dry-fruit", name: "Dry Fruit", price: 100 },
-      { id: "mixed-fruit-punch", name: "Mixed Fruit Punch", price: 70 },
-    ]
-  }
-
-];
 
 export default function MenuPage() {
   const [customer, setCustomer] = useState("");
   const [table, setTable] = useState("");
   const [cart, setCart] = useState([]);
-  const [openSections, setOpenSections] = useState({}); // track dropdowns
+  const [openSections, setOpenSections] = useState({});
+  const [menu, setMenu] = useState([]);
+
+  // Fetch menu from Firestore
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "menuItems"), (snap) => {
+      setMenu(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, []);
+
+  const formatCategory = (cat) =>
+    cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
+
+  // Group menu by category
+  const groupedMenu = useMemo(() => {
+    const groups = {};
+    menu.forEach(item => {
+      if (!groups[item.category]) groups[item.category] = [];
+      groups[item.category].push(item);
+    });
+    Object.keys(groups).forEach(cat => {
+      groups[cat].sort((a, b) => a.price - b.price);
+    });
+    return groups;
+  }, [menu]);
 
   const toggleSection = (name) => {
-    setOpenSections((prev) => ({ ...prev, [name]: !prev[name] }));
+    setOpenSections(prev => ({ ...prev, [name]: !prev[name] }));
   };
 
   const addToCart = (item) => {
@@ -162,8 +106,8 @@ export default function MenuPage() {
 
       <div className="card">
         <h3>Menu</h3>
-        {MENU_SECTIONS.map(section => (
-          <div key={section.name} style={{ marginTop: 16 }}>
+        {Object.keys(groupedMenu).map(category => (
+          <div key={category} style={{ marginTop: 16 }}>
             <h4
               style={{
                 cursor: "pointer",
@@ -171,14 +115,14 @@ export default function MenuPage() {
                 background: "#f4f4f4",
                 borderRadius: 4
               }}
-              onClick={() => toggleSection(section.name)}
+              onClick={() => toggleSection(category)}
             >
-              {section.name} {openSections[section.name] ? "▲" : "▼"}
+              {formatCategory(category)} {openSections[category] ? "▲" : "▼"}
             </h4>
 
-            {openSections[section.name] && (
+            {openSections[category] && (
               <div style={{ marginTop: 8 }}>
-                {section.items.map(item => (
+                {groupedMenu[category].map(item => (
                   <div
                     key={item.id}
                     style={{
@@ -186,12 +130,17 @@ export default function MenuPage() {
                       justifyContent: "space-between",
                       alignItems: "center",
                       padding: "6px 0",
-                      borderBottom: "1px solid #ddd"
+                      borderBottom: "1px solid #ddd",
+                      opacity: item.inStock ? 1 : 0.5
                     }}
                   >
-                    <span>{item.name}</span>
+                    <span>{formatCategory(item.name)}</span>
                     <span>₹{item.price}</span>
-                    <button className="btn" onClick={() => addToCart(item)}>Add</button>
+                    {item.inStock ? (
+                      <button className="btn" onClick={() => addToCart(item)}>Add</button>
+                    ) : (
+                      <span style={{ color: "red", fontSize: 12 }}>Out of Stock</span>
+                    )}
                   </div>
                 ))}
               </div>
