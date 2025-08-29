@@ -5,7 +5,7 @@ import logo from "./assets/pic.png";
 import CashierPage from "./pages/CashierPage";
 import MenuManagementPage from "./pages/MenuManagementPage";
 import MenuPage from "./pages/MenuPage";
-
+import QrPage from "./pages/QrPages";
 function App(){
   return (
     <Router>
@@ -25,6 +25,7 @@ function App(){
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/cashier" element={<CashierPage />} />
           <Route path="/menu-management" element={<MenuManagementPage />} />
+          <Route path="/qr" element={<QrPage />} />
         </Routes>
       </div>
     </Router>
