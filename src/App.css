@@ -142,64 +142,271 @@ body {
   color: #4b3f2f;
 }
 
-/* ---------------- RESPONSIVE ---------------- */
-@media (max-width: 768px) {
-  .header {
-    font-size: 22px;
-    padding: 14px 0;
-  }
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
 
-  .logo {
-    position: relative;
-    display: block;
-    margin: 0 auto 10px auto;
-  }
-
-  .title {
-    font-size: 1.4rem;
-  }
-
-  .menu-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .menu-list-item {
+.menu-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.cashier-header-buttons{
+  display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    font-size: 15px;
-  }
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+}
 
-  .btn {
-    padding: 6px 10px;
-    font-size: 14px;
-  }
+/* Floating Cart Button */
+.floating-cart {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #6b4226;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
 
-  .order-card {
-    flex-direction: column;
-    gap: 8px;
+.floating-cart:hover {
+  opacity: 0.9;
+}
+
+.cart-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: red;
+  color: white;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 4px 6px;
+  line-height: 1;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-/* Very small phones */
-@media (max-width: 480px) {
+
+
+
+/* ------------------- RESPONSIVE DESIGN ------------------- */
+
+/* ========== Tablets (601px – 1024px) ========== */
+@media (max-width: 1024px) and (min-width: 601px) {
+  /* General */
   .header {
-    font-size: 20px;
+    font-size: 24px;
+    padding: 16px 0;
+    text-align: center;
   }
 
   .title {
-    font-size: 1.2rem;
+    font-size: 1.6rem;
+  }
+
+  .btn {
+    padding: 8px 14px;
+    font-size: 15px;
+  }
+
+  /* Menu Page */
+  .menu-grid {
+    grid-template-columns: 1fr 1fr; /* 2 columns for better use of space */
+    gap: 16px;
+  }
+
+  .menu-list-item {
+    font-size: 16px;
+    padding: 10px;
+    justify-content: space-between;
+  }
+
+  /* OrderTracking & Cashier */
+  .order-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+  }
+
+  .cart {
+    font-size: 15px;
+  }
+
+  .status-badge {
+    font-size: 14px;
+    padding: 4px 10px;
+  }
+}
+
+/* ========== Mobiles (up to 600px) ========== */
+@media (max-width: 600px) {
+  /* General */
+  .header {
+    font-size: 20px;
+    padding: 12px 0;
+    text-align: center;
+  }
+
+  .title {
+    font-size: 1.3rem;
   }
 
   .btn {
     width: 100%;
     text-align: center;
+    padding: 10px;
+    font-size: 15px;
     margin-top: 6px;
+    border-radius: 6px;
+  }
+
+  /* Menu Page */
+  .menu-grid {
+    grid-template-columns: 1fr; /* ✅ Full-width single column */
+    gap: 14px;
+  }
+
+  .menu-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 14px;
+    background: #fff;
+    text-align: left; /* ✅ Align nicely */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .menu-card h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .menu-card p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
   }
 
   .menu-list-item {
+    flex-direction: row;         /* ✅ Keep row layout */
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: #fafafa;
+  }
+
+  .menu-list-item:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Cart */
+  .cart {
+    font-size: 14px;
+  }
+
+  /* Order Cards (Cashier & Tracking) */
+  .order-card {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .status-badge {
+    font-size: 13px;
+    padding: 4px 8px;
+  }
+
+  .input {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  /* Cashier Header Buttons in Mobile */
+  .cashier-header-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .cashier-header-buttons .btn {
+    width: 100%;
+    text-align: center;
   }
 }
 
+
+/* ========== Very Small Phones (<400px) ========== */
+@media (max-width: 400px) {
+  /* General */
+  .header {
+    font-size: 18px;
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .btn {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+
+  /* Menu Page */
+  .menu-list-item {
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  /* OrderTracking & Cashier */
+  .order-card {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .status-badge {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+  .cashier-header-buttons {
+    gap: 6px;
+  }
+
+  .cashier-header-buttons .btn {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
