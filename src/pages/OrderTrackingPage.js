@@ -2,11 +2,10 @@
 import {
   collection,
   doc,
-  getDoc,
   getDocs,
   onSnapshot,
   serverTimestamp,
-  updateDoc,
+  updateDoc
 } from "firebase/firestore";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -66,7 +65,7 @@ const [openSections, setOpenSections] = useState({});
 
   // Notification helper
   const showStatusNotification = (status) => {
-    if (!("Notification" in window)) return;
+    // if (!("Notification" in window)) return;
     const messages = {
       Pending: "Your order has been placed!",
       Preparing: "Your order is being prepared 🍳",
@@ -75,11 +74,16 @@ const [openSections, setOpenSections] = useState({});
       PaymentDone: "Payment received. Thank you! 🧾",
       Cancelled: "Your order was cancelled ❌",
     };
-    if (Notification.permission === "granted") {
+
+    const msg=messages[status] || `Order status: ${status}`;
+
+    if ("Notification" in window && Notification.permission === "granted") {
       new Notification("Order Update", {
-        body: messages[status] || `Order status: ${status}`,
+        body: msg,
         icon: "/logo192.png",
       });
+    } else{
+      alert(msg);
     }
   };
 
@@ -150,11 +154,12 @@ const [openSections, setOpenSections] = useState({});
     if (cart.length === 0) return alert("Cart is empty.");
 
     const orderRef = doc(db, "orders", orderId);
-    const snap = await getDoc(orderRef);
-    if (!snap.exists()) return alert("Order not found.");
+    // const snap = await getDoc(orderRef);
+    // if (!snap.exists()) return alert("Order not found.");
 
-    const existing = snap.data();
-    const existingBatches = existing.batches || [];
+    // const existing = snap.data();
+    // const existingBatches = existing.batches || [];
+    const existingBatches = order?.batches || [];
 
     const newBatch = {
       batchId: Date.now().toString(),
@@ -169,7 +174,7 @@ const [openSections, setOpenSections] = useState({});
     };
 
     const addedTotal = cart.reduce((s, i) => s + toNumber(i.price) * toNumber(i.qty), 0);
-    const newTotal = toNumber(existing.total) + addedTotal;
+    const newTotal = toNumber(order?.total) + addedTotal;
 
     await updateDoc(orderRef, {
       batches: [...existingBatches, newBatch],
